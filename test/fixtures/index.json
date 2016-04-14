@@ -1,0 +1,37 @@
+{
+  "files": {
+    "dirty-repo": {
+      "package.json": "Y2hhbmdlcyEK",
+      ".git/HEAD": "cmVmOiByZWZzL2hlYWRzL21hc3Rlcgo=",
+      ".git/refs/heads/master": "ZGQ5ZTQ2MTMxOWIwOThiMzljOTVmOTNiNGFkZjhjNzM1ZDYwMThiNQo="
+    },
+    "fake-repo-parent/fake-repo": {
+      "package.json": "ZG9lc24ndCBoYXZlIHRvIGJlIHZhbGlkIGpzb24K",
+      ".git/HEAD": "cmVmOiByZWZzL2hlYWRzL21hc3Rlcgo="
+    },
+    "head-is-a-commit": {
+      "package.json": "ZG9lc24ndCBoYXZlIHRvIGJlIHZhbGlkIGpzb24K",
+      ".git/HEAD": "ZGQ5ZTQ2MTMxOWIwOThiMzljOTVmOTNiNGFkZjhjNzM1ZDYwMThiNQo="
+    },
+    "head-is-a-ref": {
+      "package.json": "ZG9lc24ndCBoYXZlIHRvIGJlIHZhbGlkIGpzb24K",
+      ".git/HEAD": "cmVmOiByZWZzL2hlYWRzL21hc3Rlcgo=",
+      ".git/refs/heads/master": "ZGQ5ZTQ2MTMxOWIwOThiMzljOTVmOTNiNGFkZjhjNzM1ZDYwMThiNQo="
+    },
+    "just-a-package": {
+      "package.json": "ZG9lc24ndCBoYXZlIHRvIGJlIHZhbGlkIGpzb24K"
+    },
+    "repo-with-packed-refs": {
+      "package.json": "ZG9lc24ndCBoYXZlIHRvIGJlIHZhbGlkIGpzb24K",
+      ".git/HEAD": "cmVmOiByZWZzL2hlYWRzL21hc3Rlcgo=",
+      ".git/packed-refs": "IyBwYWNrLXJlZnMgd2l0aDogcGVlbGVkIGZ1bGx5LXBlZWxlZCAKZGQ5ZTQ2MTMxOWIwOThiMzljOTVmOTNiNGFkZjhjNzM1ZDYwMThiNSByZWZzL2hlYWRzL21hc3Rlcgo="
+    },
+    "repo-without-refs": {
+      "package.json": "ZG9lc24ndCBoYXZlIHRvIGJlIHZhbGlkIGpzb24K",
+      ".git/HEAD": "ZGQ5ZTQ2MTMxOWIwOThiMzljOTVmOTNiNGFkZjhjNzM1ZDYwMThiNQo="
+    }
+  },
+  "diffs": {
+    "dirty-repo": "ZGlmZiAtLWdpdCBhL3BhY2thZ2UuanNvbiBiL3BhY2thZ2UuanNvbgppbmRleCA5NWMyYWE5Li5mNDYzYzM0IDEwMDY0NAotLS0gYS9wYWNrYWdlLmpzb24KKysrIGIvcGFja2FnZS5qc29uCkBAIC0xICsxIEBACi1kb2Vzbid0IGhhdmUgdG8gYmUgdmFsaWQganNvbgorY2hhbmdlcyEK"
+  }
+}
