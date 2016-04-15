@@ -1,4 +1,5 @@
 import { execFileSync, spawnSync } from 'child_process'
+import { randomBytes } from 'crypto'
 import { join, resolve } from 'path'
 
 import test from 'ava'
@@ -49,6 +50,41 @@ test('can be called with a file', t => {
   const expected = md5hex([
     ownHash,
     dir,
+    bytes(files['just-a-package']['package.json'])
+  ])
+
+  t.true(actual === expected)
+})
+
+test('an additional salt can be provided', t => {
+  const salt = randomBytes(16)
+  const dir = resolve('fixtures', 'unpacked', 'just-a-package')
+  const file = join(dir, 'package.json')
+  const actual = sync(file, salt)
+  const expected = md5hex([
+    ownHash,
+    salt,
+    dir,
+    bytes(files['just-a-package']['package.json'])
+  ])
+
+  t.true(actual === expected)
+})
+
+test('can be called with a list of directories or files', t => {
+  const salt = randomBytes(16)
+  const dir = resolve('fixtures', 'unpacked', 'head-is-a-commit')
+  const dir2 = resolve('fixtures', 'unpacked', 'just-a-package')
+  const file = join(dir2, 'package.json')
+
+  const actual = sync([dir, file], salt)
+  const expected = md5hex([
+    ownHash,
+    salt,
+    dir,
+    bytes(files['head-is-a-commit']['package.json']),
+    bytes(files['head-is-a-commit']['.git/HEAD']),
+    dir2,
     bytes(files['just-a-package']['package.json'])
   ])
 

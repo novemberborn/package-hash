@@ -45,9 +45,8 @@ const git = {
   }
 }
 
-function hashPackage (salt, dir) {
-  const inputs = []
-  if (salt) inputs.push(salt)
+function addPackageData (inputs, path) {
+  const dir = statSync(path).isDirectory() ? path : dirname(path)
   inputs.push(dir)
 
   const pkg = readFileSync(join(dir, 'package.json'))
@@ -66,26 +65,36 @@ function hashPackage (salt, dir) {
     const diff = git.tryGetDiff(dir)
     if (diff) inputs.push(diff)
   }
+}
+
+function computeHash (pepper, paths, seed) {
+  const inputs = []
+  if (pepper) inputs.push(pepper)
+  if (seed) inputs.push(seed)
+
+  for (let i = 0; i < paths.length; i++) {
+    addPackageData(inputs, paths[i])
+  }
 
   return md5hex(inputs)
 }
 
 let ownHash = null
-export function sync (path) {
+export function sync (paths, seed) {
   if (!ownHash) {
     // Memoize the hash for package-hash itself.
-    ownHash = hashPackage(null, __dirname)
+    ownHash = computeHash(null, [__dirname], null)
   }
 
-  if (path === __dirname) {
-    // Don't hash package-hash twice.
+  if (paths === __dirname && !seed) {
+    // Special case that allow the pepper value to be obtained. Mainly here for
+    // testing purposes.
     return ownHash
   }
 
-  // Hash the package found at dir, salted with the hash for package-hash.
-  if (statSync(path).isDirectory()) {
-    return hashPackage(ownHash, path)
+  if (Array.isArray(paths)) {
+    return computeHash(ownHash, paths, seed)
   } else {
-    return hashPackage(ownHash, dirname(path))
+    return computeHash(ownHash, [paths], seed)
   }
 }
