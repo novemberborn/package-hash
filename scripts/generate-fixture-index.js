@@ -1,6 +1,6 @@
 'use strict'
 
-const execSync = require('child_process').execSync
+const execFileSync = require('child_process').execFileSync
 const readFileSync = require('fs').readFileSync
 const writeFileSync = require('fs').writeFileSync
 const join = require('path').posix.join
@@ -53,7 +53,7 @@ const index = {
 }
 
 index.diffs = {
-  'dirty-repo': execSync('git --no-pager diff HEAD --no-color --no-ext-diff', {
+  'dirty-repo': execFileSync('git', ['--no-pager', 'diff', 'HEAD', '--no-color', '--no-ext-diff'], {
     cwd: join(unpackedDir, 'dirty-repo'),
     env: Object.assign({}, process.env, {
       GIT_DIR: join(unpackedDir, 'dirty-repo/.git')

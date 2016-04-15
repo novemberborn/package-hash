@@ -1,4 +1,4 @@
-import { execSync, spawnSync } from 'child_process'
+import { execFileSync, spawnSync } from 'child_process'
 import { join, resolve } from 'path'
 
 import test from 'ava'
@@ -73,14 +73,14 @@ test('can be called with a file', t => {
       bytes(files[fixture]['.git/HEAD']),
       bytes(files[fixture]['.git/packed-refs']),
       bytes(files[fixture]['.git/refs/heads/master']),
-      execSync ? bytes(diffs[fixture]) : null
+      execFileSync ? bytes(diffs[fixture]) : null
     ].filter(Boolean))
 
     t.true(actual === expected)
   })
 })
 
-test('does not use the diff if execSync is not available', t => {
+test('does not use the diff if execFileSync is not available', t => {
   const { sync } = proxyquire.noCallThru()('../', {
     child_process: {}
   })

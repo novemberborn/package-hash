@@ -1,4 +1,4 @@
-import { execSync } from 'child_process'
+import { execFileSync } from 'child_process'
 import { readFileSync, statSync } from 'fs'
 import { dirname, join } from 'path'
 
@@ -23,12 +23,12 @@ const git = {
   },
 
   tryGetDiff (dir) {
-    if (!execSync) return null
+    if (!execFileSync) return null
 
     try {
       // Attempt to get consistent output no matter the platform. Diff both
       // staged and unstaged changes.
-      return execSync('git --no-pager diff HEAD --no-color --no-ext-diff', {
+      return execFileSync('git', ['--no-pager', 'diff', 'HEAD', '--no-color', '--no-ext-diff'], {
         cwd: dir,
         maxBuffer: TEN_MEBIBYTE,
         env: Object.assign({}, process.env, {
