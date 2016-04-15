@@ -46,13 +46,28 @@ const git = {
 }
 
 function hashPackage (salt, dir) {
-  const pkg = readFileSync(join(dir, 'package.json'))
-  const head = tryReadFileSync(join(dir, '.git', 'HEAD'))
-  const packed = tryReadFileSync(join(dir, '.git', 'packed-refs'))
-  const ref = head ? git.tryGetRef(dir, head) : null
-  const diff = head ? git.tryGetDiff(dir) : null
+  const inputs = []
+  if (salt) inputs.push(salt)
+  inputs.push(dir)
 
-  return md5hex([salt, dir, pkg, head, packed, ref, diff].filter(Boolean))
+  const pkg = readFileSync(join(dir, 'package.json'))
+  inputs.push(pkg)
+
+  const head = tryReadFileSync(join(dir, '.git', 'HEAD'))
+  if (head) {
+    inputs.push(head)
+
+    const packed = tryReadFileSync(join(dir, '.git', 'packed-refs'))
+    if (packed) inputs.push(packed)
+
+    const ref = git.tryGetRef(dir, head)
+    if (ref) inputs.push(ref)
+
+    const diff = git.tryGetDiff(dir)
+    if (diff) inputs.push(diff)
+  }
+
+  return md5hex(inputs)
 }
 
 let ownHash = null
