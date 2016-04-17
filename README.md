@@ -41,7 +41,30 @@ To get the path to an npm package it's best to use
 `require.resolve('the-name/package.json')`, since `require.resolve('the-name')`
 may resolve to a subdirectory of the package.
 
+You can provide multiple paths:
+
+```js
+const hash = sync([
+  require.resolve('babel-core/package.json'),
+  require.resolve('babel-preset-es2015/package.json')
+])
+```
+
+An optional seed value can also be provided:
+
+```js
+const hash = sync(require.resolve('babel-core/package.json'), 'seed value')
+```
+
 Currently only a synchronous interface is available.
+
+## API
+
+### `sync(paths[, seed])`
+
+`paths` can be a single directory or file path, or an array of paths.
+
+`seed` is optional. It should be a `Buffer` or `String`.
 
 ## Compatibility
 

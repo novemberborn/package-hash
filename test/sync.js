@@ -1,4 +1,5 @@
-import { execSync, spawnSync } from 'child_process'
+import { execFileSync, spawnSync } from 'child_process'
+import { randomBytes } from 'crypto'
 import { join, resolve } from 'path'
 
 import test from 'ava'
@@ -55,6 +56,41 @@ test('can be called with a file', t => {
   t.true(actual === expected)
 })
 
+test('an additional salt can be provided', t => {
+  const salt = randomBytes(16)
+  const dir = resolve('fixtures', 'unpacked', 'just-a-package')
+  const file = join(dir, 'package.json')
+  const actual = sync(file, salt)
+  const expected = md5hex([
+    ownHash,
+    salt,
+    dir,
+    bytes(files['just-a-package']['package.json'])
+  ])
+
+  t.true(actual === expected)
+})
+
+test('can be called with a list of directories or files', t => {
+  const salt = randomBytes(16)
+  const dir = resolve('fixtures', 'unpacked', 'head-is-a-commit')
+  const dir2 = resolve('fixtures', 'unpacked', 'just-a-package')
+  const file = join(dir2, 'package.json')
+
+  const actual = sync([dir, file], salt)
+  const expected = md5hex([
+    ownHash,
+    salt,
+    dir,
+    bytes(files['head-is-a-commit']['package.json']),
+    bytes(files['head-is-a-commit']['.git/HEAD']),
+    dir2,
+    bytes(files['just-a-package']['package.json'])
+  ])
+
+  t.true(actual === expected)
+})
+
 ;[
   'dirty-repo',
   'fake-repo-parent/fake-repo',
@@ -73,14 +109,14 @@ test('can be called with a file', t => {
       bytes(files[fixture]['.git/HEAD']),
       bytes(files[fixture]['.git/packed-refs']),
       bytes(files[fixture]['.git/refs/heads/master']),
-      execSync ? bytes(diffs[fixture]) : null
+      execFileSync ? bytes(diffs[fixture]) : null
     ].filter(Boolean))
 
     t.true(actual === expected)
   })
 })
 
-test('does not use the diff if execSync is not available', t => {
+test('does not use the diff if execFileSync is not available', t => {
   const { sync } = proxyquire.noCallThru()('../', {
     child_process: {}
   })

@@ -1,4 +1,4 @@
-import { execSync } from 'child_process'
+import { execFileSync } from 'child_process'
 import { readFileSync, statSync } from 'fs'
 import { dirname, join } from 'path'
 
@@ -23,12 +23,12 @@ const git = {
   },
 
   tryGetDiff (dir) {
-    if (!execSync) return null
+    if (!execFileSync) return null
 
     try {
       // Attempt to get consistent output no matter the platform. Diff both
       // staged and unstaged changes.
-      return execSync('git --no-pager diff HEAD --no-color --no-ext-diff', {
+      return execFileSync('git', ['--no-pager', 'diff', 'HEAD', '--no-color', '--no-ext-diff'], {
         cwd: dir,
         maxBuffer: TEN_MEBIBYTE,
         env: Object.assign({}, process.env, {
@@ -45,32 +45,56 @@ const git = {
   }
 }
 
-function hashPackage (salt, dir) {
-  const pkg = readFileSync(join(dir, 'package.json'))
-  const head = tryReadFileSync(join(dir, '.git', 'HEAD'))
-  const packed = tryReadFileSync(join(dir, '.git', 'packed-refs'))
-  const ref = head ? git.tryGetRef(dir, head) : null
-  const diff = head ? git.tryGetDiff(dir) : null
+function addPackageData (inputs, path) {
+  const dir = statSync(path).isDirectory() ? path : dirname(path)
+  inputs.push(dir)
 
-  return md5hex([salt, dir, pkg, head, packed, ref, diff].filter(Boolean))
+  const pkg = readFileSync(join(dir, 'package.json'))
+  inputs.push(pkg)
+
+  const head = tryReadFileSync(join(dir, '.git', 'HEAD'))
+  if (head) {
+    inputs.push(head)
+
+    const packed = tryReadFileSync(join(dir, '.git', 'packed-refs'))
+    if (packed) inputs.push(packed)
+
+    const ref = git.tryGetRef(dir, head)
+    if (ref) inputs.push(ref)
+
+    const diff = git.tryGetDiff(dir)
+    if (diff) inputs.push(diff)
+  }
+}
+
+function computeHash (pepper, paths, seed) {
+  const inputs = []
+  if (pepper) inputs.push(pepper)
+  if (seed) inputs.push(seed)
+
+  for (let i = 0; i < paths.length; i++) {
+    addPackageData(inputs, paths[i])
+  }
+
+  return md5hex(inputs)
 }
 
 let ownHash = null
-export function sync (path) {
+export function sync (paths, seed) {
   if (!ownHash) {
     // Memoize the hash for package-hash itself.
-    ownHash = hashPackage(null, __dirname)
+    ownHash = computeHash(null, [__dirname], null)
   }
 
-  if (path === __dirname) {
-    // Don't hash package-hash twice.
+  if (paths === __dirname && !seed) {
+    // Special case that allow the pepper value to be obtained. Mainly here for
+    // testing purposes.
     return ownHash
   }
 
-  // Hash the package found at dir, salted with the hash for package-hash.
-  if (statSync(path).isDirectory()) {
-    return hashPackage(ownHash, path)
+  if (Array.isArray(paths)) {
+    return computeHash(ownHash, paths, seed)
   } else {
-    return hashPackage(ownHash, dirname(path))
+    return computeHash(ownHash, [paths], seed)
   }
 }
