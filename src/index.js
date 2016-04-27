@@ -2,6 +2,7 @@ import { execFileSync } from 'child_process'
 import { readFileSync, statSync } from 'fs'
 import { dirname, join } from 'path'
 
+import arrify from 'arrify'
 import md5hex from 'md5-hex'
 
 function tryReadFileSync (file) {
@@ -92,9 +93,5 @@ export function sync (paths, seed) {
     return ownHash
   }
 
-  if (Array.isArray(paths)) {
-    return computeHash(ownHash, paths, seed)
-  } else {
-    return computeHash(ownHash, [paths], seed)
-  }
+  return computeHash(ownHash, arrify(paths), seed)
 }
