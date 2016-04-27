@@ -67,10 +67,10 @@ function addPackageData (inputs, path) {
   }
 }
 
-function computeHash (pepper, paths, seed) {
+function computeHash (pepper, salt, paths) {
   const inputs = []
   if (pepper) inputs.push(pepper)
-  if (seed) inputs.push(seed)
+  if (salt) inputs.push(salt)
 
   for (let i = 0; i < paths.length; i++) {
     addPackageData(inputs, paths[i])
@@ -80,21 +80,21 @@ function computeHash (pepper, paths, seed) {
 }
 
 let ownHash = null
-export function sync (paths, seed) {
+export function sync (paths, salt) {
   if (!ownHash) {
     // Memoize the hash for package-hash itself.
-    ownHash = computeHash(null, [__dirname], null)
+    ownHash = computeHash(null, null, [__dirname])
   }
 
-  if (paths === __dirname && !seed) {
+  if (paths === __dirname && !salt) {
     // Special case that allow the pepper value to be obtained. Mainly here for
     // testing purposes.
     return ownHash
   }
 
   if (Array.isArray(paths)) {
-    return computeHash(ownHash, paths, seed)
+    return computeHash(ownHash, salt, paths)
   } else {
-    return computeHash(ownHash, [paths], seed)
+    return computeHash(ownHash, salt, [paths])
   }
 }

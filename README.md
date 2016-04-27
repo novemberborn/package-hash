@@ -50,21 +50,21 @@ const hash = sync([
 ])
 ```
 
-An optional seed value can also be provided:
+An optional salt value can also be provided:
 
 ```js
-const hash = sync(require.resolve('babel-core/package.json'), 'seed value')
+const hash = sync(require.resolve('babel-core/package.json'), 'salt value')
 ```
 
 Currently only a synchronous interface is available.
 
 ## API
 
-### `sync(paths[, seed])`
+### `sync(paths, [salt])`
 
 `paths` can be a single directory or file path, or an array of paths.
 
-`seed` is optional. It should be a `Buffer` or `String`.
+`salt` is optional. It should be a `Buffer` or `String`.
 
 ## Compatibility
 
