@@ -60,11 +60,11 @@ Currently only a synchronous interface is available.
 
 ## API
 
-### `sync(paths, [salt])`
+### `sync(paths, salt?)`
 
-`paths` can be a single directory or file path, or an array of paths.
+`paths: string | string[]` ➜ can be a single directory or file path, or an array of paths.
 
-`salt` is optional. It should be a `Buffer` or `String`.
+`salt: Buffer | string` ➜ optional.
 
 ## Compatibility
 
