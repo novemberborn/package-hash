@@ -70,7 +70,12 @@ function addPackageData (inputs, path) {
 function computeHash (pepper, salt, paths) {
   const inputs = []
   if (pepper) inputs.push(pepper)
-  if (salt) inputs.push(salt)
+  if (salt) {
+    if (typeof salt === 'object' && !Buffer.isBuffer(salt)) {
+      salt = JSON.stringify(salt)
+    }
+    inputs.push(salt)
+  }
 
   for (let i = 0; i < paths.length; i++) {
     addPackageData(inputs, paths[i])

@@ -56,8 +56,39 @@ test('can be called with a file', t => {
   t.true(actual === expected)
 })
 
-test('an additional salt can be provided', t => {
+test('salt can be a Buffer', t => {
   const salt = randomBytes(16)
+  const dir = resolve('fixtures', 'unpacked', 'just-a-package')
+  const file = join(dir, 'package.json')
+  const actual = sync(file, salt)
+  const expected = md5hex([
+    ownHash,
+    salt,
+    dir,
+    bytes(files['just-a-package']['package.json'])
+  ])
+
+  t.true(actual === expected)
+})
+
+test('salt can be a JSON object', t => {
+  const salt = {foo: 'bar'}
+  const stringifiedSalt = JSON.stringify(salt)
+  const dir = resolve('fixtures', 'unpacked', 'just-a-package')
+  const file = join(dir, 'package.json')
+  const actual = sync(file, salt)
+  const expected = md5hex([
+    ownHash,
+    stringifiedSalt,
+    dir,
+    bytes(files['just-a-package']['package.json'])
+  ])
+
+  t.true(actual === expected)
+})
+
+test('salt can be a String', t => {
+  const salt = 'foobar'
   const dir = resolve('fixtures', 'unpacked', 'just-a-package')
   const file = join(dir, 'package.json')
   const actual = sync(file, salt)
