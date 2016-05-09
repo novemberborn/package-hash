@@ -67,14 +67,18 @@ function addPackageData (inputs, path) {
   }
 }
 
-function computeHash (pepper, salt, paths) {
+function computeHash (paths, pepper, salt) {
   const inputs = []
   if (pepper) inputs.push(pepper)
-  if (salt) {
-    if (typeof salt === 'object' && !Buffer.isBuffer(salt)) {
-      salt = JSON.stringify(salt)
+
+  if (typeof salt !== 'undefined') {
+    if (Buffer.isBuffer(salt) || typeof salt === 'string') {
+      inputs.push(salt)
+    } else if (typeof salt === 'object' && salt !== null) {
+      inputs.push(JSON.stringify(salt))
+    } else {
+      throw new TypeError('Salt must be an Array, Buffer, Object or string')
     }
-    inputs.push(salt)
   }
 
   for (let i = 0; i < paths.length; i++) {
@@ -88,18 +92,18 @@ let ownHash = null
 export function sync (paths, salt) {
   if (!ownHash) {
     // Memoize the hash for package-hash itself.
-    ownHash = new Buffer(computeHash(null, null, [__dirname]), 'hex')
+    ownHash = new Buffer(computeHash([__dirname]), 'hex')
   }
 
-  if (paths === __dirname && !salt) {
+  if (paths === __dirname && typeof salt === 'undefined') {
     // Special case that allow the pepper value to be obtained. Mainly here for
     // testing purposes.
     return ownHash.toString('hex')
   }
 
   if (Array.isArray(paths)) {
-    return computeHash(ownHash, salt, paths)
+    return computeHash(paths, ownHash, salt)
   } else {
-    return computeHash(ownHash, salt, [paths])
+    return computeHash([paths], ownHash, salt)
   }
 }
