@@ -17,8 +17,10 @@ function bytes (base64) {
 
 let ownHash = null
 test.serial('hashes itself', t => {
-  ownHash = sync(resolve('..'))
-  t.truthy(ownHash)
+  const result = sync(resolve('..'))
+  t.true(typeof result === 'string')
+  t.true(result.length > 0)
+  ownHash = new Buffer(result, 'hex')
 })
 
 test('throws when called with a directory that is not an installed package', t => {
@@ -151,7 +153,7 @@ test('does not use the diff if execFileSync is not available', t => {
   const { sync } = proxyquire.noCallThru()('../', {
     child_process: {}
   })
-  const ownHash = sync(resolve('..'))
+  const ownHash = new Buffer(sync(resolve('..')), 'hex')
 
   const dir = resolve('fixtures', 'unpacked', 'dirty-repo')
   const actual = sync(dir)

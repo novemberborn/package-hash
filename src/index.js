@@ -88,13 +88,13 @@ let ownHash = null
 export function sync (paths, salt) {
   if (!ownHash) {
     // Memoize the hash for package-hash itself.
-    ownHash = computeHash(null, null, [__dirname])
+    ownHash = new Buffer(computeHash(null, null, [__dirname]), 'hex')
   }
 
   if (paths === __dirname && !salt) {
     // Special case that allow the pepper value to be obtained. Mainly here for
     // testing purposes.
-    return ownHash
+    return ownHash.toString('hex')
   }
 
   if (Array.isArray(paths)) {
