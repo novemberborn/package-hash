@@ -64,7 +64,7 @@ Currently only a synchronous interface is available.
 
 `paths: string | string[]` ➜ can be a single directory or file path, or an array of paths.
 
-`salt: Buffer | string` ➜ optional.
+`salt: Array | Buffer | Object | string` ➜ optional. If an `Array` or `Object` (not `null`) it is first converted to a JSON string.
 
 ## Compatibility
 
