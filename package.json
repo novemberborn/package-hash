@@ -1,6 +1,6 @@
 {
   "name": "package-hash",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Generates a hash for an installed npm package, useful for salting caches",
   "main": "index.js",
   "files": [
