@@ -17,8 +17,10 @@ function bytes (base64) {
 
 let ownHash = null
 test.serial('hashes itself', t => {
-  ownHash = sync(resolve('..'))
-  t.truthy(ownHash)
+  const result = sync(resolve('..'))
+  t.true(typeof result === 'string')
+  t.true(result.length > 0)
+  ownHash = new Buffer(result, 'hex')
 })
 
 test('throws when called with a directory that is not an installed package', t => {
@@ -56,50 +58,38 @@ test('can be called with a file', t => {
   t.true(actual === expected)
 })
 
-test('salt can be a Buffer', t => {
-  const salt = randomBytes(16)
-  const dir = resolve('fixtures', 'unpacked', 'just-a-package')
-  const file = join(dir, 'package.json')
-  const actual = sync(file, salt)
-  const expected = md5hex([
-    ownHash,
-    salt,
-    dir,
-    bytes(files['just-a-package']['package.json'])
-  ])
-
-  t.true(actual === expected)
+;[
+  ['null', null],
+  ['a number', 42],
+  ['a boolean', false],
+  ['a function', () => {}]
+].forEach(([label, salt]) => {
+  test(`salt cannot be ${label}`, t => {
+    const err = t.throws(() => sync(resolve('..'), salt), TypeError)
+    t.is(err.message, 'Salt must be an Array, Buffer, Object or string')
+  })
 })
 
-test('salt can be a JSON object', t => {
-  const salt = {foo: 'bar'}
-  const stringifiedSalt = JSON.stringify(salt)
-  const dir = resolve('fixtures', 'unpacked', 'just-a-package')
-  const file = join(dir, 'package.json')
-  const actual = sync(file, salt)
-  const expected = md5hex([
-    ownHash,
-    stringifiedSalt,
-    dir,
-    bytes(files['just-a-package']['package.json'])
-  ])
+;[
+  ['can be a Buffer', randomBytes(16)],
+  ['can be an Array', [{foo: 'bar'}, 'baz'], JSON.stringify([{foo: 'bar'}, 'baz'])],
+  ['can be an Object', {foo: 'bar'}, JSON.stringify({foo: 'bar'})],
+  ['can be a string', 'foobar'],
+  ['is ignored when undefined', undefined, '']
+].forEach(([label, salt, stringifiedSalt = salt]) => {
+  test(`salt ${label}`, t => {
+    const dir = resolve('fixtures', 'unpacked', 'just-a-package')
+    const file = join(dir, 'package.json')
+    const actual = sync(file, salt)
+    const expected = md5hex([
+      ownHash,
+      stringifiedSalt,
+      dir,
+      bytes(files['just-a-package']['package.json'])
+    ])
 
-  t.true(actual === expected)
-})
-
-test('salt can be a String', t => {
-  const salt = 'foobar'
-  const dir = resolve('fixtures', 'unpacked', 'just-a-package')
-  const file = join(dir, 'package.json')
-  const actual = sync(file, salt)
-  const expected = md5hex([
-    ownHash,
-    salt,
-    dir,
-    bytes(files['just-a-package']['package.json'])
-  ])
-
-  t.true(actual === expected)
+    t.true(actual === expected)
+  })
 })
 
 test('can be called with a list of directories or files', t => {
@@ -151,7 +141,7 @@ test('does not use the diff if execFileSync is not available', t => {
   const { sync } = proxyquire.noCallThru()('../', {
     child_process: {}
   })
-  const ownHash = sync(resolve('..'))
+  const ownHash = new Buffer(sync(resolve('..')), 'hex')
 
   const dir = resolve('fixtures', 'unpacked', 'dirty-repo')
   const actual = sync(dir)
