@@ -4,7 +4,8 @@
   "description": "Generates a hash for an installed npm package, useful for salting caches",
   "main": "dist/index.js",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
     "clean": "rimraf dist",
