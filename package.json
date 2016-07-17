@@ -8,7 +8,7 @@
     "src"
   ],
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf coverage dist",
     "prebuild": "npm run clean",
     "build": "babel src --out-dir dist --source-maps",
     "prepublish": "npm run build",
@@ -19,7 +19,7 @@
     "pretest": "npm run unpack-fixtures",
     "test": "ava",
     "posttest": "npm run lint",
-    "coverage": "nyc npm test",
+    "coverage": "npm run build -- --plugins istanbul && nyc npm test",
     "watch:build": "npm run build -- --watch",
     "watch:test": "npm run test -- --watch"
   },
@@ -40,12 +40,13 @@
     "@novemberborn/as-i-preach": "^4.0.2",
     "ava": "^0.15.2",
     "babel-cli": "^6.7.5",
+    "babel-plugin-istanbul": "^1.0.3",
     "babel-plugin-transform-es2015-block-scoping": "^6.7.1",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.7.4",
     "babel-plugin-transform-es2015-shorthand-properties": "^6.5.0",
     "babel-plugin-transform-object-assign": "^6.5.0",
     "babel-plugin-transform-strict-mode": "^6.6.5",
-    "nyc": "^6.4.0",
+    "nyc": "^7.0.0",
     "proxyquire": "^1.7.4",
     "rimraf": "^2.5.2",
     "tar": "^2.2.1"
@@ -61,6 +62,7 @@
   },
   "nyc": {
     "cache": true,
+    "instrument": false,
     "exclude": [
       "scripts",
       "test"
@@ -69,6 +71,7 @@
       "html",
       "lcov",
       "text"
-    ]
+    ],
+    "sourceMap": false
   }
 }
