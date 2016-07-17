@@ -1,8 +1,10 @@
 import { execFileSync } from 'child_process'
 import { readFileSync, statSync } from 'fs'
-import { dirname, join } from 'path'
+import { dirname, join, resolve } from 'path'
 
 import md5hex from 'md5-hex'
+
+const PACKAGE_DIR = resolve(__dirname, '..')
 
 function tryReadFileSync (file) {
   try {
@@ -92,10 +94,10 @@ let ownHash = null
 export function sync (paths, salt) {
   if (!ownHash) {
     // Memoize the hash for package-hash itself.
-    ownHash = new Buffer(computeHash([__dirname]), 'hex')
+    ownHash = new Buffer(computeHash([PACKAGE_DIR]), 'hex')
   }
 
-  if (paths === __dirname && typeof salt === 'undefined') {
+  if (paths === PACKAGE_DIR && typeof salt === 'undefined') {
     // Special case that allow the pepper value to be obtained. Mainly here for
     // testing purposes.
     return ownHash.toString('hex')
