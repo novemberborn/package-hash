@@ -1,5 +1,6 @@
 'use strict'
 // Compatible with Node 0.10
+/* eslint-disable no-var */
 
 var createReadStream = require('fs').createReadStream
 var readdirSync = require('fs').readdirSync

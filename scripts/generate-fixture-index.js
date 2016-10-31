@@ -44,9 +44,9 @@ const files = {
 
 const index = {
   files: Object.keys(files).reduce((acc, fixture) => {
-    acc[fixture] = files[fixture].reduce((acc, file) => {
-      acc[file] = readFileSync(join(unpackedDir, fixture, file), 'base64')
-      return acc
+    acc[fixture] = files[fixture].reduce((read, file) => {
+      read[file] = readFileSync(join(unpackedDir, fixture, file), 'base64')
+      return read
     }, {})
     return acc
   }, {})

@@ -138,15 +138,15 @@ test('can be called with a list of directories or files', t => {
 })
 
 test('does not use the diff if execFileSync is not available', t => {
-  const { sync } = proxyquire.noCallThru()('../', {
+  const { sync: syncWithoutExecFileSync } = proxyquire.noCallThru()('../', {
     child_process: {}
   })
-  const ownHash = new Buffer(sync(resolve('..')), 'hex')
+  const hash = new Buffer(syncWithoutExecFileSync(resolve('..')), 'hex')
 
   const dir = resolve('fixtures', 'unpacked', 'dirty-repo')
-  const actual = sync(dir)
+  const actual = syncWithoutExecFileSync(dir)
   const expected = md5hex([
-    ownHash,
+    hash,
     dir,
     bytes(files['dirty-repo']['package.json']),
     bytes(files['dirty-repo']['.git/HEAD']),
