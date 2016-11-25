@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@novemberborn/as-i-preach": "^6.0.0",
-    "ava": "^0.16.0",
+    "ava": "^0.17.0",
     "babel-cli": "^6.7.5",
     "babel-plugin-istanbul": "^2.0.1",
     "babel-plugin-transform-es2015-block-scoping": "^6.7.1",
