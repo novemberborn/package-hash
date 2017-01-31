@@ -7,6 +7,9 @@
     "dist",
     "src"
   ],
+  "engines": {
+    "node": ">=4"
+  },
   "scripts": {
     "clean": "rimraf coverage dist",
     "prebuild": "npm run clean",
@@ -47,7 +50,6 @@
     "babel-plugin-transform-object-assign": "^6.5.0",
     "babel-plugin-transform-strict-mode": "^6.6.5",
     "nyc": "^10.0.0",
-    "proxyquire": "^1.7.4",
     "rimraf": "^2.5.2",
     "tar": "^2.2.1"
   },

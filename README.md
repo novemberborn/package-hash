@@ -68,5 +68,5 @@ Currently only a synchronous interface is available.
 
 ## Compatibility
 
-`package-hash` has been tested with Node 0.10 and above, including Windows
-support. Note that `git diff` support is not available in Node 0.10.
+`package-hash` has been tested with Node.js 4 and above, including Windows
+support.

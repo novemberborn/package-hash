@@ -1,24 +1,22 @@
 'use strict'
-// Compatible with Node 0.10
-/* eslint-disable no-var */
 
-var createReadStream = require('fs').createReadStream
-var readdirSync = require('fs').readdirSync
-var join = require('path').join
-var resolve = require('path').resolve
+const createReadStream = require('fs').createReadStream
+const readdirSync = require('fs').readdirSync
+const join = require('path').join
+const resolve = require('path').resolve
 
-var rimraf = require('rimraf')
-var tar = require('tar')
+const rimraf = require('rimraf')
+const tar = require('tar')
 
-var unpackedDir = resolve(__dirname, '..', 'test', 'fixtures', 'unpacked')
-var packedDir = resolve(__dirname, '..', 'test', 'fixtures', 'packed')
+const unpackedDir = resolve(__dirname, '..', 'test', 'fixtures', 'unpacked')
+const packedDir = resolve(__dirname, '..', 'test', 'fixtures', 'packed')
 
 rimraf.sync(unpackedDir)
 
-var files = readdirSync(packedDir)
-  .filter(function (name) { return /\.tar$/.test(name) })
-  .map(function (name) { return join(packedDir, name) })
+const files = readdirSync(packedDir)
+  .filter(name => /\.tar$/.test(name))
+  .map(name => join(packedDir, name))
 
-files.forEach(function (file) {
+files.forEach(file => {
   createReadStream(file).pipe(tar.Extract(unpackedDir))
 })
