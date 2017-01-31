@@ -2,19 +2,14 @@
   "name": "package-hash",
   "version": "1.2.0",
   "description": "Generates a hash for an installed npm package, useful for salting caches",
-  "main": "dist/index.js",
+  "main": "index.js",
   "files": [
-    "dist",
-    "src"
+    "index.js"
   ],
   "engines": {
     "node": ">=4"
   },
   "scripts": {
-    "clean": "rimraf coverage dist",
-    "prebuild": "npm run clean",
-    "build": "babel src --out-dir dist --source-maps",
-    "prepublish": "npm run build",
     "lint": "as-i-preach",
     "unpack-fixtures": "node scripts/unpack-fixtures.js",
     "pregenerate-fixture-index": "npm run unpack-fixtures",
@@ -22,8 +17,7 @@
     "pretest": "npm run unpack-fixtures",
     "test": "ava",
     "posttest": "npm run lint",
-    "coverage": "npm run build -- --plugins istanbul && nyc npm test",
-    "watch:build": "npm run build -- --watch",
+    "coverage": "nyc npm test",
     "watch:test": "npm run test -- --watch"
   },
   "repository": {
@@ -42,29 +36,12 @@
   "devDependencies": {
     "@novemberborn/as-i-preach": "^6.0.0",
     "ava": "^0.17.0",
-    "babel-cli": "^6.7.5",
-    "babel-plugin-istanbul": "^3.0.0",
-    "babel-plugin-transform-es2015-block-scoping": "^6.7.1",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.7.4",
-    "babel-plugin-transform-es2015-shorthand-properties": "^6.5.0",
-    "babel-plugin-transform-object-assign": "^6.5.0",
-    "babel-plugin-transform-strict-mode": "^6.6.5",
     "nyc": "^10.0.0",
     "rimraf": "^2.5.2",
     "tar": "^2.2.1"
   },
-  "babel": {
-    "plugins": [
-      "transform-object-assign",
-      "transform-es2015-block-scoping",
-      "transform-es2015-modules-commonjs",
-      "transform-es2015-shorthand-properties",
-      "transform-strict-mode"
-    ]
-  },
   "nyc": {
     "cache": true,
-    "instrument": false,
     "exclude": [
       "scripts",
       "test"
@@ -73,8 +50,7 @@
       "html",
       "lcov",
       "text"
-    ],
-    "sourceMap": false
+    ]
   },
   "standard-engine": "@novemberborn/as-i-preach"
 }
