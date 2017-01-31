@@ -1,10 +1,9 @@
-import { execFileSync, spawnSync } from 'child_process'
+import { spawnSync } from 'child_process'
 import { randomBytes } from 'crypto'
 import { join, resolve as resolvePath } from 'path'
 
 import test from 'ava'
 import md5hex from 'md5-hex'
-import proxyquire from 'proxyquire'
 
 import { sync } from '../'
 import { files, diffs } from './fixtures/index.json'
@@ -136,30 +135,11 @@ test('can be called with a list of directories or files', t => {
       bytes(files[fixture]['.git/HEAD']),
       bytes(files[fixture]['.git/packed-refs']),
       bytes(files[fixture]['.git/refs/heads/master']),
-      execFileSync ? bytes(diffs[fixture]) : null
+      bytes(diffs[fixture])
     ].filter(Boolean))
 
     t.true(actual === expected)
   })
-})
-
-test('does not use the diff if execFileSync is not available', t => {
-  const { sync: syncWithoutExecFileSync } = proxyquire.noCallThru()('../', {
-    child_process: {}
-  })
-  const hash = new Buffer(syncWithoutExecFileSync(projectDir), 'hex')
-
-  const dir = resolveFixture('unpacked', 'dirty-repo')
-  const actual = syncWithoutExecFileSync(dir)
-  const expected = md5hex([
-    hash,
-    dir,
-    bytes(files['dirty-repo']['package.json']),
-    bytes(files['dirty-repo']['.git/HEAD']),
-    bytes(files['dirty-repo']['.git/refs/heads/master'])
-  ])
-
-  t.true(actual === expected)
 })
 
 if (spawnSync) {
