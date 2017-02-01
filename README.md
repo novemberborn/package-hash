@@ -27,13 +27,17 @@ $ npm install --save package-hash
 ## Usage
 
 ```js
-const sync = require('package-hash').sync
+const packageHash = require('package-hash')
 
-const hash = sync(require.resolve('babel-core/package.json'))
+// Asynchronously:
+const hash = await packageHash(require.resolve('babel-core/package.json'))
+
+// Synchronously:
+const hash = packageHash.sync(require.resolve('babel-core/package.json'))
 ```
 
-`sync()` can be called with a directory or file path. File paths are translated
-to directories using
+`packageHash()` / `packageHash.sync()` can be called with a directory or file
+path. File paths are translated to directories using
 [`path.dirname()`](https://nodejs.org/api/path.html#path_path_dirname_p). The
 path must exist. A `package.json` must exist within the directory.
 
@@ -44,7 +48,7 @@ may resolve to a subdirectory of the package.
 You can provide multiple paths:
 
 ```js
-const hash = sync([
+const hash = await packageHash([
   require.resolve('babel-core/package.json'),
   require.resolve('babel-preset-es2015/package.json')
 ])
@@ -53,18 +57,26 @@ const hash = sync([
 An optional salt value can also be provided:
 
 ```js
-const hash = sync(require.resolve('babel-core/package.json'), 'salt value')
+const hash = await packageHash(require.resolve('babel-core/package.json'), 'salt value')
 ```
-
-Currently only a synchronous interface is available.
 
 ## API
 
-### `sync(paths, salt?)`
+### `packageHash(paths, salt?)`
 
 `paths: string | string[]` ➜ can be a single directory or file path, or an array of paths.
 
 `salt: Array | Buffer | Object | string` ➜ optional. If an `Array` or `Object` (not `null`) it is first converted to a JSON string.
+
+Returns a promise for the hex-encoded hash string.
+
+### `packageHash.sync(paths, salt?)`
+
+`paths: string | string[]` ➜ can be a single directory or file path, or an array of paths.
+
+`salt: Array | Buffer | Object | string` ➜ optional. If an `Array` or `Object` (not `null`) it is first converted to a JSON string.
+
+Returns a hex-encoded hash string.
 
 ## Compatibility
 

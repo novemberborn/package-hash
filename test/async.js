@@ -1,11 +1,10 @@
-import { spawnSync } from 'child_process'
 import { randomBytes } from 'crypto'
 import { join, resolve as resolvePath } from 'path'
 
 import test from 'ava'
 import md5hex from 'md5-hex'
 
-import { sync } from '../'
+import packageHash from '../'
 import { files, diffs } from './fixtures/index.json'
 
 function resolveFixture (...args) {
@@ -20,27 +19,33 @@ function bytes (base64) {
   return new Buffer(base64, 'base64')
 }
 
+const async = (...args) => packageHash(...args).then()
+
 let ownHash = null
-test.serial('hashes itself', t => {
-  const result = sync(projectDir)
+test.serial('hashes itself', async t => {
+  const [result] = await Promise.all([
+    // Run in parallel to provide code coverage to ownHashPromise usage
+    async(projectDir),
+    async(projectDir)
+  ])
   t.true(typeof result === 'string')
   t.true(result.length > 0)
   ownHash = new Buffer(result, 'hex')
 })
 
-test('throws when called with a directory that is not an installed package', t => {
-  const err = t.throws(() => sync(resolveFixture('unpacked', 'not-a-package')))
+test('throws when called with a directory that is not an installed package', async t => {
+  const err = await t.throws(async(resolveFixture('unpacked', 'not-a-package')))
   t.is(err.code, 'ENOENT')
 })
 
-test('throws when called with a non-existent path', t => {
-  const err = t.throws(() => sync(resolveFixture('does-not-exist')))
+test('throws when called with a non-existent path', async t => {
+  const err = await t.throws(async(resolveFixture('does-not-exist')))
   t.is(err.code, 'ENOENT')
 })
 
-test('can be called with a directory', t => {
+test('can be called with a directory', async t => {
   const dir = resolveFixture('unpacked', 'just-a-package')
-  const actual = sync(dir)
+  const actual = await async(dir)
   const expected = md5hex([
     ownHash,
     dir,
@@ -50,10 +55,10 @@ test('can be called with a directory', t => {
   t.true(actual === expected)
 })
 
-test('can be called with a file', t => {
+test('can be called with a file', async t => {
   const dir = resolveFixture('unpacked', 'just-a-package')
   const file = join(dir, 'package.json')
-  const actual = sync(file)
+  const actual = await async(file)
   const expected = md5hex([
     ownHash,
     dir,
@@ -69,8 +74,8 @@ test('can be called with a file', t => {
   ['a boolean', false],
   ['a function', () => {}]
 ].forEach(([label, salt]) => {
-  test(`salt cannot be ${label}`, t => {
-    const err = t.throws(() => sync(projectDir, salt), TypeError)
+  test(`salt cannot be ${label}`, async t => {
+    const err = await t.throws(() => async(projectDir, salt), TypeError)
     t.is(err.message, 'Salt must be an Array, Buffer, Object or string')
   })
 })
@@ -82,10 +87,10 @@ test('can be called with a file', t => {
   ['can be a string', 'foobar'],
   ['is ignored when undefined', undefined, '']
 ].forEach(([label, salt, stringifiedSalt = salt]) => {
-  test(`salt ${label}`, t => {
+  test(`salt ${label}`, async t => {
     const dir = resolveFixture('unpacked', 'just-a-package')
     const file = join(dir, 'package.json')
-    const actual = sync(file, salt)
+    const actual = await async(file, salt)
     const expected = md5hex([
       ownHash,
       stringifiedSalt,
@@ -97,13 +102,13 @@ test('can be called with a file', t => {
   })
 })
 
-test('can be called with a list of directories or files', t => {
+test('can be called with a list of directories or files', async t => {
   const salt = randomBytes(16)
   const dir = resolveFixture('unpacked', 'head-is-a-commit')
   const dir2 = resolveFixture('unpacked', 'just-a-package')
   const file = join(dir2, 'package.json')
 
-  const actual = sync([dir, file], salt)
+  const actual = await async([dir, file], salt)
   const expected = md5hex([
     ownHash,
     salt,
@@ -125,9 +130,9 @@ test('can be called with a list of directories or files', t => {
   'repo-with-packed-refs',
   'repo-without-refs'
 ].forEach(fixture => {
-  test(`${fixture} is hashed correctly`, t => {
+  test(`${fixture} is hashed correctly`, async t => {
     const dir = resolveFixture('unpacked', fixture)
-    const actual = sync(dir)
+    const actual = await async(dir)
     const expected = md5hex([
       ownHash,
       dir,
@@ -141,10 +146,3 @@ test('can be called with a list of directories or files', t => {
     t.true(actual === expected)
   })
 })
-
-if (spawnSync) {
-  test('diffing should not write to stderr', t => {
-    const child = spawnSync(process.execPath, [resolvePath(__dirname, '_hash-fake-repo.js')])
-    t.true(child.stderr.toString('utf8') === '')
-  })
-}

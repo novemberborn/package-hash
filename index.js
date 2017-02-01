@@ -1,38 +1,94 @@
 'use strict'
 
-const execFileSync = require('child_process').execFileSync
+const cp = require('child_process')
 const fs = require('fs')
 const path = require('path')
 
+const gfs = require('graceful-fs')
+const flattenDeep = require('lodash.flattendeep')
 const md5hex = require('md5-hex')
+const releaseZalgo = require('release-zalgo')
 
 const PACKAGE_DIR = path.resolve(__dirname)
+const TEN_MEBIBYTE = 1024 * 1024 * 10
 
-function tryReadFileSync (file) {
-  try {
+const readFile = {
+  async (file) {
+    return new Promise((resolve, reject) => {
+      gfs.readFile(file, (err, contents) => {
+        err ? reject(err) : resolve(contents)
+      })
+    })
+  },
+  sync (file) {
     return fs.readFileSync(file)
-  } catch (err) {
-    return null
   }
 }
 
-const TEN_MEBIBYTE = 1024 * 1024 * 10
+const stat = {
+  async (statpath) {
+    return new Promise((resolve, reject) => {
+      gfs.stat(statpath, (err, result) => {
+        err ? reject(err) : resolve(result)
+      })
+    })
+  },
+  sync (statpath) {
+    return fs.statSync(statpath)
+  }
+}
+
+const tryReadFile = {
+  async (file) {
+    return new Promise(resolve => {
+      gfs.readFile(file, (err, contents) => {
+        resolve(err ? null : contents)
+      })
+    })
+  },
+
+  sync (file) {
+    try {
+      return fs.readFileSync(file)
+    } catch (err) {
+      return null
+    }
+  }
+}
+
+const tryExecFile = {
+  async (file, args, options) {
+    return new Promise(resolve => {
+      cp.execFile(file, args, options, (err, stdout) => {
+        resolve(err ? null : stdout)
+      })
+    })
+  },
+
+  sync (file, args, options) {
+    try {
+      return cp.execFileSync(file, args, options)
+    } catch (err) {
+      return null
+    }
+  }
+}
 
 const git = {
-  tryGetRef (dir, head) {
+  tryGetRef (zalgo, dir, head) {
     const m = /^ref: (.+)$/.exec(head.toString('utf8').trim())
     if (!m) return null
 
-    return tryReadFileSync(path.join(dir, '.git', m[1]))
+    return zalgo.run(tryReadFile, path.join(dir, '.git', m[1]))
   },
 
-  tryGetDiff (dir) {
-    if (!execFileSync) return null
-
-    try {
+  tryGetDiff (zalgo, dir) {
+    return zalgo.run(tryExecFile,
+      'git',
       // Attempt to get consistent output no matter the platform. Diff both
       // staged and unstaged changes.
-      return execFileSync('git', ['--no-pager', 'diff', 'HEAD', '--no-color', '--no-ext-diff'], {
+      ['--no-pager', 'diff', 'HEAD', '--no-color', '--no-ext-diff'],
+      {
         cwd: dir,
         maxBuffer: TEN_MEBIBYTE,
         env: Object.assign({}, process.env, {
@@ -43,37 +99,37 @@ const git = {
         // Ignore stderr.
         stdio: ['ignore', 'pipe', 'ignore']
       })
-    } catch (err) {
-      return null
-    }
   }
 }
 
-function addPackageData (inputs, pkgPath) {
-  const dir = fs.statSync(pkgPath).isDirectory()
-    ? pkgPath
-    : path.dirname(pkgPath)
-  inputs.push(dir)
+function addPackageData (zalgo, pkgPath) {
+  return zalgo.run(stat, pkgPath)
+    .then(statResult => {
+      const dir = statResult.isDirectory()
+        ? pkgPath
+        : path.dirname(pkgPath)
 
-  const pkg = fs.readFileSync(path.join(dir, 'package.json'))
-  inputs.push(pkg)
+      return zalgo.all([
+        dir,
+        zalgo.run(readFile, path.join(dir, 'package.json')),
+        zalgo.run(tryReadFile, path.join(dir, '.git', 'HEAD'))
+          .then(head => {
+            if (!head) return []
 
-  const head = tryReadFileSync(path.join(dir, '.git', 'HEAD'))
-  if (head) {
-    inputs.push(head)
-
-    const packed = tryReadFileSync(path.join(dir, '.git', 'packed-refs'))
-    if (packed) inputs.push(packed)
-
-    const ref = git.tryGetRef(dir, head)
-    if (ref) inputs.push(ref)
-
-    const diff = git.tryGetDiff(dir)
-    if (diff) inputs.push(diff)
-  }
+            return zalgo.all([
+              zalgo.run(tryReadFile, path.join(dir, '.git', 'packed-refs')),
+              git.tryGetRef(zalgo, dir, head),
+              git.tryGetDiff(zalgo, dir)
+            ])
+              .then(results => {
+                return [head].concat(results.filter(Boolean))
+              })
+          })
+      ])
+    })
 }
 
-function computeHash (paths, pepper, salt) {
+function computeHash (zalgo, paths, pepper, salt) {
   const inputs = []
   if (pepper) inputs.push(pepper)
 
@@ -87,28 +143,46 @@ function computeHash (paths, pepper, salt) {
     }
   }
 
-  for (const pkgPath of paths) {
-    addPackageData(inputs, pkgPath)
-  }
-
-  return md5hex(inputs)
+  return zalgo.all(paths.map(pkgPath => addPackageData(zalgo, pkgPath)))
+    .then(furtherInputs => md5hex(flattenDeep([inputs, furtherInputs])))
 }
 
 let ownHash = null
-function sync (paths, salt) {
+let ownHashPromise = null
+function run (zalgo, paths, salt) {
   if (!ownHash) {
-    // Memoize the hash for package-hash itself.
-    ownHash = new Buffer(computeHash([PACKAGE_DIR]), 'hex')
+    return zalgo.run({
+      async () {
+        if (!ownHashPromise) {
+          ownHashPromise = computeHash(zalgo, [PACKAGE_DIR])
+        }
+        return ownHashPromise
+      },
+      sync () {
+        return computeHash(zalgo, [PACKAGE_DIR])
+      }
+    })
+      .then(hash => {
+        ownHash = new Buffer(hash, 'hex')
+        ownHashPromise = null
+        return run(zalgo, paths, salt)
+      })
   }
 
   if (paths === PACKAGE_DIR && typeof salt === 'undefined') {
     // Special case that allow the pepper value to be obtained. Mainly here for
     // testing purposes.
-    return ownHash.toString('hex')
+    return zalgo.returns(ownHash.toString('hex'))
   }
 
-  return Array.isArray(paths)
-    ? computeHash(paths, ownHash, salt)
-    : computeHash([paths], ownHash, salt)
+  paths = Array.isArray(paths) ? paths : [paths]
+  return computeHash(zalgo, paths, ownHash, salt)
 }
-exports.sync = sync
+
+module.exports = (paths, salt) => {
+  return run(releaseZalgo.async(), paths, salt)
+}
+module.exports.sync = (paths, salt) => {
+  const result = run(releaseZalgo.sync(), paths, salt)
+  return releaseZalgo.unwrapSync(result)
+}
