@@ -9,7 +9,7 @@ const flattenDeep = require('lodash.flattendeep')
 const md5hex = require('md5-hex')
 const releaseZalgo = require('release-zalgo')
 
-const PACKAGE_DIR = path.resolve(__dirname)
+const PACKAGE_FILE = require.resolve('./package.json')
 const TEN_MEBIBYTE = 1024 * 1024 * 10
 
 const readFile = {
@@ -22,19 +22,6 @@ const readFile = {
   },
   sync (file) {
     return fs.readFileSync(file)
-  }
-}
-
-const stat = {
-  async (statpath) {
-    return new Promise((resolve, reject) => {
-      gfs.stat(statpath, (err, result) => {
-        err ? reject(err) : resolve(result)
-      })
-    })
-  },
-  sync (statpath) {
-    return fs.statSync(statpath)
   }
 }
 
@@ -103,30 +90,25 @@ const git = {
 }
 
 function addPackageData (zalgo, pkgPath) {
-  return zalgo.run(stat, pkgPath)
-    .then(statResult => {
-      const dir = statResult.isDirectory()
-        ? pkgPath
-        : path.dirname(pkgPath)
+  const dir = path.dirname(pkgPath)
 
-      return zalgo.all([
-        dir,
-        zalgo.run(readFile, path.join(dir, 'package.json')),
-        zalgo.run(tryReadFile, path.join(dir, '.git', 'HEAD'))
-          .then(head => {
-            if (!head) return []
+  return zalgo.all([
+    dir,
+    zalgo.run(readFile, pkgPath),
+    zalgo.run(tryReadFile, path.join(dir, '.git', 'HEAD'))
+      .then(head => {
+        if (!head) return []
 
-            return zalgo.all([
-              zalgo.run(tryReadFile, path.join(dir, '.git', 'packed-refs')),
-              git.tryGetRef(zalgo, dir, head),
-              git.tryGetDiff(zalgo, dir)
-            ])
-              .then(results => {
-                return [head].concat(results.filter(Boolean))
-              })
+        return zalgo.all([
+          zalgo.run(tryReadFile, path.join(dir, '.git', 'packed-refs')),
+          git.tryGetRef(zalgo, dir, head),
+          git.tryGetDiff(zalgo, dir)
+        ])
+          .then(results => {
+            return [head].concat(results.filter(Boolean))
           })
-      ])
-    })
+      })
+  ])
 }
 
 function computeHash (zalgo, paths, pepper, salt) {
@@ -154,12 +136,12 @@ function run (zalgo, paths, salt) {
     return zalgo.run({
       async () {
         if (!ownHashPromise) {
-          ownHashPromise = computeHash(zalgo, [PACKAGE_DIR])
+          ownHashPromise = computeHash(zalgo, [PACKAGE_FILE])
         }
         return ownHashPromise
       },
       sync () {
-        return computeHash(zalgo, [PACKAGE_DIR])
+        return computeHash(zalgo, [PACKAGE_FILE])
       }
     })
       .then(hash => {
@@ -169,7 +151,7 @@ function run (zalgo, paths, salt) {
       })
   }
 
-  if (paths === PACKAGE_DIR && typeof salt === 'undefined') {
+  if (paths === PACKAGE_FILE && typeof salt === 'undefined') {
     // Special case that allow the pepper value to be obtained. Mainly here for
     // testing purposes.
     return zalgo.returns(ownHash.toString('hex'))
