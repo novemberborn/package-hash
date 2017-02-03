@@ -6,3 +6,6 @@ node_js:
 script: npm test
 notifications:
   email: false
+script: npm run coverage
+after_script:
+  - "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
