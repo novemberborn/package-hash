@@ -25,8 +25,8 @@ let ownHash = null
 test.serial('hashes itself', async t => {
   const [result] = await Promise.all([
     // Run in parallel to provide code coverage to ownHashPromise usage
-    async(projectDir),
-    async(projectDir)
+    async(join(projectDir, 'package.json')),
+    async(join(projectDir, 'package.json'))
   ])
   t.true(typeof result === 'string')
   t.true(result.length > 0)
@@ -34,25 +34,13 @@ test.serial('hashes itself', async t => {
 })
 
 test('throws when called with a directory that is not an installed package', async t => {
-  const err = await t.throws(async(resolveFixture('unpacked', 'not-a-package')))
+  const err = await t.throws(async(resolveFixture('unpacked', 'not-a-package', 'package.json')))
   t.is(err.code, 'ENOENT')
 })
 
 test('throws when called with a non-existent path', async t => {
-  const err = await t.throws(async(resolveFixture('does-not-exist')))
+  const err = await t.throws(async(resolveFixture('does-not-exist', 'package.json')))
   t.is(err.code, 'ENOENT')
-})
-
-test('can be called with a directory', async t => {
-  const dir = resolveFixture('unpacked', 'just-a-package')
-  const actual = await async(dir)
-  const expected = md5hex([
-    ownHash,
-    dir,
-    bytes(files['just-a-package']['package.json'])
-  ])
-
-  t.true(actual === expected)
 })
 
 test('can be called with a file', async t => {
@@ -102,13 +90,14 @@ test('can be called with a file', async t => {
   })
 })
 
-test('can be called with a list of directories or files', async t => {
+test('can be called with a list of files', async t => {
   const salt = randomBytes(16)
   const dir = resolveFixture('unpacked', 'head-is-a-commit')
+  const file = resolveFixture(dir, 'package.json')
   const dir2 = resolveFixture('unpacked', 'just-a-package')
-  const file = join(dir2, 'package.json')
+  const file2 = join(dir2, 'package.json')
 
-  const actual = await async([dir, file], salt)
+  const actual = await async([file, file2], salt)
   const expected = md5hex([
     ownHash,
     salt,
@@ -132,7 +121,7 @@ test('can be called with a list of directories or files', async t => {
 ].forEach(fixture => {
   test(`${fixture} is hashed correctly`, async t => {
     const dir = resolveFixture('unpacked', fixture)
-    const actual = await async(dir)
+    const actual = await async(join(dir, 'package.json'))
     const expected = md5hex([
       ownHash,
       dir,

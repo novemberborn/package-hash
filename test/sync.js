@@ -22,32 +22,20 @@ function bytes (base64) {
 
 let ownHash = null
 test.serial('hashes itself', t => {
-  const result = sync(projectDir)
+  const result = sync(join(projectDir, 'package.json'))
   t.true(typeof result === 'string')
   t.true(result.length > 0)
   ownHash = new Buffer(result, 'hex')
 })
 
 test('throws when called with a directory that is not an installed package', t => {
-  const err = t.throws(() => sync(resolveFixture('unpacked', 'not-a-package')))
+  const err = t.throws(() => sync(resolveFixture('unpacked', 'not-a-package', 'package.json')))
   t.is(err.code, 'ENOENT')
 })
 
 test('throws when called with a non-existent path', t => {
-  const err = t.throws(() => sync(resolveFixture('does-not-exist')))
+  const err = t.throws(() => sync(resolveFixture('does-not-exist', 'package.json')))
   t.is(err.code, 'ENOENT')
-})
-
-test('can be called with a directory', t => {
-  const dir = resolveFixture('unpacked', 'just-a-package')
-  const actual = sync(dir)
-  const expected = md5hex([
-    ownHash,
-    dir,
-    bytes(files['just-a-package']['package.json'])
-  ])
-
-  t.true(actual === expected)
 })
 
 test('can be called with a file', t => {
@@ -97,13 +85,14 @@ test('can be called with a file', t => {
   })
 })
 
-test('can be called with a list of directories or files', t => {
+test('can be called with a list of files', t => {
   const salt = randomBytes(16)
   const dir = resolveFixture('unpacked', 'head-is-a-commit')
+  const file = join(dir, 'package.json')
   const dir2 = resolveFixture('unpacked', 'just-a-package')
-  const file = join(dir2, 'package.json')
+  const file2 = join(dir2, 'package.json')
 
-  const actual = sync([dir, file], salt)
+  const actual = sync([file, file2], salt)
   const expected = md5hex([
     ownHash,
     salt,
@@ -127,7 +116,7 @@ test('can be called with a list of directories or files', t => {
 ].forEach(fixture => {
   test(`${fixture} is hashed correctly`, t => {
     const dir = resolveFixture('unpacked', fixture)
-    const actual = sync(dir)
+    const actual = sync(join(dir, 'package.json'))
     const expected = md5hex([
       ownHash,
       dir,

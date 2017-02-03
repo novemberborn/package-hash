@@ -36,14 +36,9 @@ const hash = await packageHash(require.resolve('babel-core/package.json'))
 const hash = packageHash.sync(require.resolve('babel-core/package.json'))
 ```
 
-`packageHash()` / `packageHash.sync()` can be called with a directory or file
-path. File paths are translated to directories using
-[`path.dirname()`](https://nodejs.org/api/path.html#path_path_dirname_p). The
-path must exist. A `package.json` must exist within the directory.
-
-To get the path to an npm package it's best to use
-`require.resolve('the-name/package.json')`, since `require.resolve('the-name')`
-may resolve to a subdirectory of the package.
+`packageHash()` / `packageHash.sync()` must be called with a file path for an
+existing `package.json` file. To get the path to an npm package it's easiest to
+use `require.resolve('the-name/package.json')`.
 
 You can provide multiple paths:
 
@@ -64,7 +59,7 @@ const hash = await packageHash(require.resolve('babel-core/package.json'), 'salt
 
 ### `packageHash(paths, salt?)`
 
-`paths: string | string[]` ➜ can be a single directory or file path, or an array of paths.
+`paths: string | string[]` ➜ can be a single file path, or an array of paths.
 
 `salt: Array | Buffer | Object | string` ➜ optional. If an `Array` or `Object` (not `null`) it is first converted to a JSON string.
 
@@ -72,7 +67,7 @@ Returns a promise for the hex-encoded hash string.
 
 ### `packageHash.sync(paths, salt?)`
 
-`paths: string | string[]` ➜ can be a single directory or file path, or an array of paths.
+`paths: string | string[]` ➜ can be a single file path, or an array of paths.
 
 `salt: Array | Buffer | Object | string` ➜ optional. If an `Array` or `Object` (not `null`) it is first converted to a JSON string.
 
