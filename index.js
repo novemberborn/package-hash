@@ -145,7 +145,7 @@ function run (zalgo, paths, salt) {
       }
     })
       .then(hash => {
-        ownHash = new Buffer(hash, 'hex')
+        ownHash = Buffer.from(hash, 'hex')
         ownHashPromise = null
         return run(zalgo, paths, salt)
       })

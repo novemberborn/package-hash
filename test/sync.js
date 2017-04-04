@@ -17,7 +17,7 @@ const projectDir = resolvePath(__dirname, '..')
 function bytes (base64) {
   if (typeof base64 === 'undefined') return null
 
-  return new Buffer(base64, 'base64')
+  return Buffer.from(base64, 'base64')
 }
 
 let ownHash = null
@@ -25,7 +25,7 @@ test.serial('hashes itself', t => {
   const result = sync(join(projectDir, 'package.json'))
   t.true(typeof result === 'string')
   t.true(result.length > 0)
-  ownHash = new Buffer(result, 'hex')
+  ownHash = Buffer.from(result, 'hex')
 })
 
 test('throws when called with a directory that is not an installed package', t => {
