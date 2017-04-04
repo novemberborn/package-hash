@@ -7,7 +7,7 @@
     "index.js"
   ],
   "engines": {
-    "node": ">=4"
+    "node": ">=4.5"
   },
   "scripts": {
     "lint": "as-i-preach",
@@ -37,7 +37,7 @@
     "release-zalgo": "^1.0.0"
   },
   "devDependencies": {
-    "@novemberborn/as-i-preach": "^7.0.0",
+    "@novemberborn/as-i-preach": "^8.0.0",
     "ava": "^0.18.0",
     "coveralls": "^2.11.15",
     "nyc": "^10.0.0",
