@@ -37,7 +37,7 @@
     "release-zalgo": "^1.0.0"
   },
   "devDependencies": {
-    "@novemberborn/as-i-preach": "^9.0.0",
+    "@novemberborn/as-i-preach": "^10.0.0",
     "ava": "^0.19.0",
     "coveralls": "^2.11.15",
     "nyc": "^10.0.0",
