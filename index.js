@@ -162,7 +162,11 @@ function run (zalgo, paths, salt) {
 }
 
 module.exports = (paths, salt) => {
-  return run(releaseZalgo.async(), paths, salt)
+  try {
+    return run(releaseZalgo.async(), paths, salt)
+  } catch (err) {
+    return Promise.reject(err)
+  }
 }
 module.exports.sync = (paths, salt) => {
   const result = run(releaseZalgo.sync(), paths, salt)
