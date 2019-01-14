@@ -63,7 +63,7 @@ test('can be called with a file', async t => {
   ['a function', () => {}]
 ].forEach(([label, salt]) => {
   test(`salt cannot be ${label}`, async t => {
-    const err = await t.throws(() => async(projectDir, salt), TypeError)
+    const err = await t.throws(async(projectDir, salt), TypeError)
     t.is(err.message, 'Salt must be an Array, Buffer, Object or string')
   })
 })
