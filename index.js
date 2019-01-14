@@ -1,6 +1,6 @@
 'use strict'
 
-const cp = require('child_process')
+const cp = require('child_process') // eslint-disable-line security/detect-child-process
 const fs = require('fs')
 const path = require('path')
 

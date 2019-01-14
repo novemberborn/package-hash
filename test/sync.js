@@ -1,12 +1,12 @@
-import { spawnSync } from 'child_process'
-import { randomBytes } from 'crypto'
-import { join, resolve as resolvePath } from 'path'
+import {spawnSync} from 'child_process'
+import {randomBytes} from 'crypto'
+import {join, resolve as resolvePath} from 'path'
 
 import test from 'ava'
 import md5hex from 'md5-hex'
 
-import { sync } from '../'
-import { files, diffs } from './fixtures/index.json'
+import {sync} from '..'
+import {files, diffs} from './fixtures/index.json'
 
 function resolveFixture (...args) {
   return resolvePath(__dirname, 'fixtures', ...args)
