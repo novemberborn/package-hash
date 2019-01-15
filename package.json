@@ -7,7 +7,7 @@
     "index.js"
   ],
   "engines": {
-    "node": ">=4.5"
+    "node": ">=6"
   },
   "scripts": {
     "lint": "as-i-preach",
@@ -31,18 +31,18 @@
   },
   "homepage": "https://github.com/novemberborn/package-hash#readme",
   "dependencies": {
-    "graceful-fs": "^4.1.11",
+    "graceful-fs": "^4.1.15",
     "lodash.flattendeep": "^4.4.0",
     "md5-hex": "^2.0.0",
     "release-zalgo": "^1.0.0"
   },
   "devDependencies": {
-    "@novemberborn/as-i-preach": "^10.1.0",
-    "ava": "^0.21.0",
-    "codecov": "^2.2.0",
-    "nyc": "^11.0.3",
-    "rimraf": "^2.5.2",
-    "tar": "^3.1.5"
+    "@novemberborn/as-i-preach": "^11.0.0",
+    "ava": "^1.1.0",
+    "codecov": "^3.1.0",
+    "nyc": "^13.1.0",
+    "rimraf": "^2.6.3",
+    "tar": "^4.4.8"
   },
   "nyc": {
     "cache": true,

@@ -1,11 +1,13 @@
-import { randomBytes } from 'crypto'
-import { join, resolve as resolvePath } from 'path'
+// Need this until @novemberborn/as-i-preach allows t.throwsAsync
+/* eslint ava/use-t-well: "off" */
+import {randomBytes} from 'crypto'
+import {join, resolve as resolvePath} from 'path'
 
 import test from 'ava'
 import md5hex from 'md5-hex'
 
-import packageHash from '../'
-import { files, diffs } from './fixtures/index.json'
+import packageHash from '..'
+import {files, diffs} from './fixtures/index.json'
 
 function resolveFixture (...args) {
   return resolvePath(__dirname, 'fixtures', ...args)
@@ -34,12 +36,12 @@ test.serial('hashes itself', async t => {
 })
 
 test('throws when called with a directory that is not an installed package', async t => {
-  const err = await t.throws(async(resolveFixture('unpacked', 'not-a-package', 'package.json')))
+  const err = await t.throwsAsync(async(resolveFixture('unpacked', 'not-a-package', 'package.json')))
   t.is(err.code, 'ENOENT')
 })
 
 test('throws when called with a non-existent path', async t => {
-  const err = await t.throws(async(resolveFixture('does-not-exist', 'package.json')))
+  const err = await t.throwsAsync(async(resolveFixture('does-not-exist', 'package.json')))
   t.is(err.code, 'ENOENT')
 })
 
@@ -63,7 +65,7 @@ test('can be called with a file', async t => {
   ['a function', () => {}]
 ].forEach(([label, salt]) => {
   test(`salt cannot be ${label}`, async t => {
-    const err = await t.throws(async(projectDir, salt), TypeError)
+    const err = await t.throwsAsync(async(projectDir, salt), TypeError)
     t.is(err.message, 'Salt must be an Array, Buffer, Object or string')
   })
 })

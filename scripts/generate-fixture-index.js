@@ -1,6 +1,6 @@
 'use strict'
 
-const execFileSync = require('child_process').execFileSync
+const execFileSync = require('child_process').execFileSync // eslint-disable-line security/detect-child-process
 const readFileSync = require('fs').readFileSync
 const writeFileSync = require('fs').writeFileSync
 const join = require('path').posix.join
