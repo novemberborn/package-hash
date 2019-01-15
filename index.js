@@ -6,7 +6,7 @@ const path = require('path')
 
 const gfs = require('graceful-fs')
 const flattenDeep = require('lodash.flattendeep')
-const md5hex = require('md5-hex')
+const hasha = require('hasha')
 const releaseZalgo = require('release-zalgo')
 
 const PACKAGE_FILE = require.resolve('./package.json')
@@ -126,7 +126,7 @@ function computeHash (zalgo, paths, pepper, salt) {
   }
 
   return zalgo.all(paths.map(pkgPath => addPackageData(zalgo, pkgPath)))
-    .then(furtherInputs => md5hex(flattenDeep([inputs, furtherInputs])))
+    .then(furtherInputs => hasha(flattenDeep([inputs, furtherInputs]), {algorithm: 'sha256'}))
 }
 
 let ownHash = null
