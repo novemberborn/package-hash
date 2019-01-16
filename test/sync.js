@@ -3,7 +3,7 @@ import {randomBytes} from 'crypto'
 import {join, resolve as resolvePath} from 'path'
 
 import test from 'ava'
-import md5hex from 'md5-hex'
+import hasha from 'hasha'
 
 import {sync} from '..'
 import {files, diffs} from './fixtures/index.json'
@@ -42,11 +42,11 @@ test('can be called with a file', t => {
   const dir = resolveFixture('unpacked', 'just-a-package')
   const file = join(dir, 'package.json')
   const actual = sync(file)
-  const expected = md5hex([
+  const expected = hasha([
     ownHash,
     dir,
     bytes(files['just-a-package']['package.json'])
-  ])
+  ], {algorithm: 'sha256'})
 
   t.true(actual === expected)
 })
@@ -74,12 +74,12 @@ test('can be called with a file', t => {
     const dir = resolveFixture('unpacked', 'just-a-package')
     const file = join(dir, 'package.json')
     const actual = sync(file, salt)
-    const expected = md5hex([
+    const expected = hasha([
       ownHash,
       stringifiedSalt,
       dir,
       bytes(files['just-a-package']['package.json'])
-    ])
+    ], {algorithm: 'sha256'})
 
     t.true(actual === expected)
   })
@@ -93,7 +93,7 @@ test('can be called with a list of files', t => {
   const file2 = join(dir2, 'package.json')
 
   const actual = sync([file, file2], salt)
-  const expected = md5hex([
+  const expected = hasha([
     ownHash,
     salt,
     dir,
@@ -101,7 +101,7 @@ test('can be called with a list of files', t => {
     bytes(files['head-is-a-commit']['.git/HEAD']),
     dir2,
     bytes(files['just-a-package']['package.json'])
-  ])
+  ], {algorithm: 'sha256'})
 
   t.true(actual === expected)
 })
@@ -117,7 +117,7 @@ test('can be called with a list of files', t => {
   test(`${fixture} is hashed correctly`, t => {
     const dir = resolveFixture('unpacked', fixture)
     const actual = sync(join(dir, 'package.json'))
-    const expected = md5hex([
+    const expected = hasha([
       ownHash,
       dir,
       bytes(files[fixture]['package.json']),
@@ -125,7 +125,7 @@ test('can be called with a list of files', t => {
       bytes(files[fixture]['.git/packed-refs']),
       bytes(files[fixture]['.git/refs/heads/master']),
       bytes(diffs[fixture])
-    ].filter(Boolean))
+    ].filter(Boolean), {algorithm: 'sha256'})
 
     t.true(actual === expected)
   })
