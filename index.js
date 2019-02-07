@@ -5,7 +5,7 @@ const fs = require('fs')
 const path = require('path')
 
 const gfs = require('graceful-fs')
-const flattenDeep = require('lodash.flattendeep')
+const flattenDeep = require('lodash').flattenDeep
 const hasha = require('hasha')
 const releaseZalgo = require('release-zalgo')
 
