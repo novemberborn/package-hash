@@ -11,6 +11,7 @@ const releaseZalgo = require('release-zalgo')
 
 const PACKAGE_FILE = require.resolve('./package.json')
 const TEN_MEBIBYTE = 1024 * 1024 * 10
+const execFile = promisify(cp.execFile)
 
 const readFile = {
   async: promisify(fs.readFile),
@@ -33,7 +34,7 @@ const tryReadFile = {
 
 const tryExecFile = {
   async (file, args, options) {
-    return promisify(cp.execFile)(file, args, options)
+    return execFile(file, args, options)
       .then(({stdout}) => stdout)
       .catch(() => null)
   },
