@@ -38,9 +38,9 @@
   },
   "devDependencies": {
     "@novemberborn/as-i-preach": "^11.0.0",
-    "ava": "^1.1.0",
-    "codecov": "^3.1.0",
-    "nyc": "^13.1.0",
+    "ava": "^1.4.1",
+    "codecov": "^3.3.0",
+    "nyc": "^13.3.0",
     "rimraf": "^2.6.3",
     "tar": "^4.4.8"
   },
