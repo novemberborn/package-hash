@@ -7,17 +7,13 @@ node_js:
   - 10
   - 8
 env:
-  - FRESH_DEPS=false
   - FRESH_DEPS=true
 matrix:
-  exclude:
+  include:
+    # Only verify package-lock.json on node.js 11 for linux
     - node_js: 11
-      env: FRESH_DEPS=true
-    - node_js: 8
-      env: FRESH_DEPS=true
-    - node_js: 10
-      env: FRESH_DEPS=true # Assume any bugs that occur with fresh dependencies are not platform specific.
-      os: windows
+      env: FRESH_DEPS=false
+      os: linux
 script: npm run coverage
 cache: npm
 install: npm ci
