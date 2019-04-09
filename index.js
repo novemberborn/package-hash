@@ -1,11 +1,10 @@
 'use strict'
 
 const cp = require('child_process') // eslint-disable-line security/detect-child-process
-const fs = require('fs')
 const path = require('path')
 const {promisify} = require('util')
 
-const gfs = require('graceful-fs')
+const fs = require('graceful-fs')
 const flattenDeep = require('lodash.flattendeep')
 const hasha = require('hasha')
 const releaseZalgo = require('release-zalgo')
@@ -14,7 +13,7 @@ const PACKAGE_FILE = require.resolve('./package.json')
 const TEN_MEBIBYTE = 1024 * 1024 * 10
 
 const readFile = {
-  async: promisify(gfs.readFile),
+  async: promisify(fs.readFile),
   sync: fs.readFileSync
 }
 
