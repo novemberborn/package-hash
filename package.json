@@ -38,11 +38,11 @@
   },
   "devDependencies": {
     "@novemberborn/as-i-preach": "^11.0.0",
-    "ava": "^1.4.1",
+    "ava": "^2.4.0",
     "codecov": "^3.3.0",
-    "nyc": "^13.3.0",
-    "rimraf": "^2.6.3",
-    "tar": "^4.4.8"
+    "nyc": "^15.0.0",
+    "rimraf": "^3.0.0",
+    "tar": "^5.0.5"
   },
   "nyc": {
     "cache": true,
